@@ -1,0 +1,28 @@
+---
+title: "Statistical Method codes"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+#Use this code chunk to include libraries, and set global options.
+
+library(tidyverse)
+library(maxLik)
+```
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+loglik_binom <- function(psi, x, n){
+if(psi < 0 | psi > 1)
+return(NA)
+else {
+pi <- (1-psi)/(2-psi)
+return(log(choose(1000,50))+(x*log(pi))+((170-x)*log(1-pi)))
+  }
+}
+maxLik(logLik = loglik_binom, start = 0.55,
+method = "NR", tol = 1e-4,
+x = 8, n = 170)
+```
