@@ -1,0 +1,98 @@
+---
+title: "Stat 342 Final"
+author: "Katherine Fulton"
+date: "2024-05-22"
+output: pdf_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(maxLik)
+```
+
+# **Results**
+
+Typically, results sections start with descriptive statistics, e.g. what percent of the sample is male/female, what is the mean GPA overall, in the different groups, etc. Figures can be nice to illustrate these differences! However, information presented must be relevant in helping to answer the research question(s) of interest. Typically, inferential (i.e., confidence intervals, significance tests) statistics come next. Do not give raw computer output here! This should look like a peer-reviewed journal article results section. Tables and figures should be labeled, embedded in the text, and referenced appropriately. The results section typically makes for fairly dry reading. It does not explain the impact of findings, it merely highlights and reports statistical information. 
+
+\begin{table}[h]
+\centering
+\caption{Vaccine Efficacy against Covid 19 at least 7 days after second dose in patients without evidence of infection}
+\begin{tabular}{cccc}
+Group & Covid-19 Cases & No. of subjects\\ \hline
+BNT162b2 & 8 & 17,411 \\
+Placebo & 162 & 17,511 \\ \hline
+Total & 170 & 34,922 \\ \hline
+\end{tabular}
+\end{table}
+
+# Observed Statistics
+```{r}
+# create data frame from table
+Vaccine_data <- data.frame(
+  Group = c("BNT162b2", "Placebo"),
+  Covid19_Cases = c(8, 162),
+  No_of_Subjects = c(17411, 17511)
+)
+
+# calculate the number of non-cases
+Vaccine_data <- Vaccine_data %>%
+  mutate(Non_Covid19_Cases = No_of_Subjects - Covid19_Cases)
+
+print(Vaccine_data)
+
+# observed vaccine efficacy
+vac_prob <- 8 / 17411
+plac_prob <- 162 / 17511
+
+vac_eff <- (1 - (vac_prob / plac_prob))* 100
+
+print(vac_eff)
+```
+
+
+# Segmented Bar Plot
+```{r segmented bar_plot, include = TRUE}
+# make the data long for plot
+data_long <- pivot_longer(Vaccine_data, cols = c("Covid19_Cases", "Non_Covid19_Cases"), 
+                          names_to = "Status", values_to = "Count")
+
+# segmented bar plot
+ggplot(data_long, aes(fill = Status, y = Count, x = Group)) +
+  geom_bar(position = "stack", stat = "identity") +
+  scale_fill_manual(values = c("Covid19_Cases" = "red", "Non_Covid19_Cases" = "lightblue")) +
+  labs(title = "Covid-19 Cases in Vaccine and Placebo Groups",
+       x = "Group", y = "Number of Subjects", fill = "Status") +
+  theme_minimal()
+```
+
+# Log Likelihood
+```{r psi_MLE}
+loglik_binom <- function(psi, x, n){
+  if(psi < 0 | psi > 1)
+  return(NA)
+  else {
+  pi <- (1-psi)/(2-psi)
+  return(log(choose(1000,50))+(x*log(pi))+((170-x)*log(1-pi)))
+  }
+}
+
+MLE <- maxLik(logLik = loglik_binom, 
+             start = 0.55,
+             method = "NR", tol = 1e-4,
+             x = 8, n = 170)
+
+MLE
+```
+
+# Method of Moments
+```{r psi_MOM}
+n <- 170
+t <- 8
+psi <- (2*t - n)/(-n+t)
+psi
+```
+
+
+
