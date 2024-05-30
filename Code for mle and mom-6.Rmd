@@ -1,0 +1,154 @@
+---
+title: "Statistical Method codes"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+#Use this code chunk to include libraries, and set global options.
+
+library(tidyverse)
+library(maxLik)
+```
+
+# Observed Statistics
+```{r}
+# create data frame from table
+Vaccine_data <- data.frame(
+  Group = c("BNT162b2", "Placebo"),
+  Covid19_Cases = c(8, 162),
+  No_of_Subjects = c(17411, 17511)
+)
+
+# calculate the number of non-cases
+Vaccine_data <- Vaccine_data %>%
+  mutate(Non_Covid19_Cases = No_of_Subjects - Covid19_Cases)
+
+print(Vaccine_data)
+
+# observed vaccine efficacy
+vac_prob <- 8 / 17411
+plac_prob <- 162 / 17511
+
+vac_eff <- (1 - (vac_prob / plac_prob))* 100
+
+print(vac_eff)
+```
+
+```{r mle}
+loglik_binom <- function(psi, x, n){
+if(psi < 0 | psi > 1)
+return(NA)
+else {
+pi <- (1-psi)/(2-psi)
+return(log(choose(1000,50))+(x*log(pi))+((170-x)*log(1-pi)))
+  }
+}
+maxLik(logLik = loglik_binom, start = 0.55,
+method = "NR", tol = 1e-4,
+x = 8, n = 170)
+```
+```{r SE and CI}
+SE <- sqrt(1/3045.805)
+lower <- 0.95 - 1.96*SE
+upper <- 0.95 + 1.96*SE
+lower
+upper
+```
+```{r ratio test}
+t <- 8
+mle <- 0.95
+null <- 0.3
+L_mle <- choose(170, t)*((1-mle)/(2-mle))^t*(1-(1-mle)/(2-mle))^(170-t)
+L_null <- choose(170, t)*((1-null)/(2-null))^t*(1-(1-null)/(2-null))^(170-t)
+W <- 2*log(L_mle/L_null)
+p_val <- pchisq(W, df =1, lower.tail=F)
+p_val
+```
+
+```{r mom}
+n <- 170
+t <- 8
+psi <- (2*t - n)/(-n+t)
+psi
+```
+
+From the m.o.m estimator we got from hand calculation, we could assume that the binomial distribution in this scenario may be skewed. Therefore, a simple percentile method is used for the bootstrap to find the confidence interval. $\\$
+
+```{r bootstrapping with mom formula}
+B = 1000
+set.seed(1234)
+boot_df <- tibble(
+  boot_psi = replicate(n = B, {
+             n1 <- Vaccine_data$No_of_Subjects[1]
+             n2 <- Vaccine_data$No_of_Subjects[2]
+             
+             BNT_covid <- Vaccine_data$Covid19_Cases[1]
+             placebo_covid <- Vaccine_data$Covid19_Cases[2]
+             
+             BNT_resamp <- rbinom(1, n1, BNT_covid/n1)
+             
+             boot_psi <- (2*BNT_covid-170)/(-170+BNT_covid)
+  })
+)
+
+boot_df %>% slice_head(n=5)
+boot_df %>% summarise(boot_mean = mean(boot_psi), boot_sd = sd(boot_psi))
+boot_df %>% summarise(lower = quantile(boot_psi, 0.025),
+                      upper = quantile(boot_psi, 0.975))
+```
+```{r bootstrapping, no mom formula, use this one}
+B = 1000
+set.seed(1234)
+boot_df_2 <- tibble(
+  boot_psi = replicate(n = B, {
+             n1 <- Vaccine_data$No_of_Subjects[1]
+             n2 <- Vaccine_data$No_of_Subjects[2]
+             
+             BNT_covid <- Vaccine_data$Covid19_Cases[1]
+             placebo_covid <- Vaccine_data$Covid19_Cases[2]
+             
+             BNT_resamp <- rbinom(1, n1, BNT_covid/n1)
+             placebo_resamp <- rbinom(1, n2, placebo_covid/n2)
+             
+             pi_v <- BNT_resamp/n1
+             pi_p <- placebo_resamp/n2
+             pi <- pi_v/(pi_v+pi_p)
+             
+             boot_psi <- (1-2*pi)/(1-pi)
+  })
+)
+
+boot_df_2 %>% slice_head(n=5)
+boot_df_2 %>% summarise(boot_mean = mean(boot_psi), boot_sd = sd(boot_psi))
+boot_df_2 %>% summarise(lower = quantile(boot_psi, 0.025),
+                      upper = quantile(boot_psi, 0.975))
+```
+
+```{r empirical pval}
+B = 1000
+set.seed(1234)
+
+null <- tibble(
+   tstar = replicate(n = B, {
+             n1 <- Vaccine_data$No_of_Subjects[1]
+             n2 <- Vaccine_data$No_of_Subjects[2]
+             
+             BNT_covid <- Vaccine_data$Covid19_Cases[1]
+             placebo_covid <- Vaccine_data$Covid19_Cases[2]
+             
+             BNT_resamp <- rbinom(1, n1, BNT_covid/n1)
+             placebo_resamp <- rbinom(1, n2, placebo_covid/n2)
+             
+             pi_v <- BNT_resamp/n1
+             pi_p <- placebo_resamp/n2
+             pi <- pi_v/(pi_v+pi_p)
+             
+             tstar <- (1-2*pi)/(1-pi)
+  })
+)
+
+obs_t = 8
+pval <- sum(null$tstar >= obs_t)/ B
+pval
+```
+
