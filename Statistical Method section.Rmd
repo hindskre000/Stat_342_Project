@@ -1,0 +1,143 @@
+---
+title: "Statistical Method"
+author : "Tracia Pan"
+output: pdf_document
+date: "2024-05-22"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(maxLik)
+pbinom(8,170,0.3,lower.tail=T)
+```
+\begin{align}
+\begin{aligned}
+\end{aligned}
+\end{align}
+
+e. **Statistical Methods**: begin with defining the random variable and your statistical model, define the parameter of interest and then describe at least two different approaches you will use to make inference about it. 
+
+    You should have (at least) two subsections, one for each method, which contain formulas and details of calculations related to that method. The results for the data at hand will only be shown in the next section.
+
+
+Using a single binomial variable model, let $T$ denote the number of subjects in the BNT162b2 group out of all the $n = 170$ Covid-19 cases. $\\$
+
+\begin{align}
+\begin{aligned}
+T \sim (n = 170, \pi) \\
+\text{Where } \pi = P(BNT162b2|Covid-19 case) \text{ and can be shown to be equal to} \\
+\pi = \frac{n_1 \pi_1}{n_1 \pi_1+n_2 \pi_2}\\
+\text{Since } n_1 = 17411 \text{ and } n_2 = 17511\text{, we can say that }\\ 
+n_1 \approx n_2 \text{, the randomization is } 1:1 \text{, and can simplify } \pi \text{ to} \\
+\pi = \frac{\pi_1}{\pi_1+ \pi_2} \\
+\text{We then have our parameter of interest} \\
+\psi = \frac{\pi_2 - \pi_1}{\pi_2} \\
+= \frac{1 - 2\pi}{1-\pi} \\
+= 1 - \frac{\pi_1}{\pi_2}
+\end{aligned}
+\end{align}
+
+To make inferences, we decided to use likelihood inference and method of moments estimation.$\\$
+\begin{align}
+\begin{aligned}
+\end{aligned}
+\end{align}
+
+# Likelihood inference
+In this section, the $\hat{\psi_0^{mle}}$ was calculated, and large sample confidence interval and a likelihood ratio test were performed to calculate the P-value that tests $H_0: \psi_0 = 0.3$ versus $H_a: \psi_0 > 0.3$. $\\$
+parameter of interest: $\psi = \frac{1 - 2\pi}{1-\pi} \Longleftrightarrow \pi=\frac{1- \psi}{2- \psi}\\$  
+\begin{align}
+\begin{aligned}
+L(\psi) &=  (\binom{170}{t}) (\frac{1- \psi}{2- \psi})^t (1-\frac{1- \psi}{2- \psi})^{170-t}, x = 0, 1, \dots, 170 \\
+\ell(\psi) &= ln(\binom{170}{t}) + tln(\frac{1- \psi}{2- \psi}) + (170-t)ln(1-\frac{1- \psi}{2- \psi})\\
+\ell '(\psi) &= -\frac{t}{(-\psi+1)(-\psi+2)} + \frac{170-t}{\psi + 2}\\
+\end{aligned}
+\end{align}
+
+\begin{align}
+\begin{aligned}
+\text{To find } \hat{\psi_0^{mle}} \text{, we set } \ell '(\psi) &= 0\\
+-\frac{t}{(-\psi+1)(-\psi+2)} + \frac{170-t}{\psi + 2} &= 0\\
+\frac{t}{(-\psi+1)(-\psi+2)} &= \frac{170-t}{\psi + 2} \\
+t(-\psi+2) &= (170-t)(-\psi+1)(-\psi+2)\\
+t &= (170-t)(-\psi+1)\\
+t &= -170\psi + \psi t - t +170 \\
+170 \psi - \psi t &= -2t+170\\
+\psi(170-t) &= -2t+170 \\
+\hat{\psi_0^{mle}} &= \frac{-2t+170}{170-t}\\
+t &= 8 \\
+\hat{\psi_0^{mle}} &= \frac{-2(8)+170}{170-(8)} = 0.95
+\end{aligned}
+\end{align}
+
+To find the 95% confidence interval, we need to find $SE = \sqrt{\frac{-1}{\ell ''(\psi)}} \\$
+\begin{align}
+\begin{aligned}
+\ell '(\psi) &= -\frac{t}{(-\psi+1)(-\psi+2)} + \frac{170-t}{\psi + 2}\\
+\ell ''(\psi) &= \frac{t(2\psi-3)}{(-\psi +1)^2(-\psi+2)^2} + \frac{170-t}{(-\psi+2)^2}\\
+\text{Plugging in } t = 8 \text{ and } \psi = 0.95\\
+&= -3045.805 \\
+- \ell ''(\psi) &= 3045.805\\
+SE &= \sqrt{\frac{-1}{\ell ''(\psi)}} = \sqrt{\frac{1}{-\ell ''(\psi)}} \\
+&= \sqrt{\frac{1}{3045.805}} \\ 
+\end{aligned}
+\end{align}
+
+Assuming that n is large and the regularity conditions are met, we have $\\$
+$\psi_0^{mle} \approx Norm(\psi_0, SE(\psi_0^{mle})= \sqrt{\frac{1}{3045.805}})\\$
+The 95% Confidence interval is $\\$
+$\psi_0^{mle} \pm 1.96 \times SE \\$
+$0.95 \pm 1.96 \times \sqrt{\frac{1}{3045.805}} \\$
+
+Using the Likelihood ratio test to find the p-value, we have the hypothesis $\\$
+$H_0: \psi_0 = 0.3$ $H_a: \psi_0 > 0.3$. $\\$
+$\hat{\psi_0^{mle}} = 0.95\\$
+$W = 2ln(\frac{L(\psi_0^{mle})}{L(\psi_0^{mom})}) \approx 121.6\\$
+When $H_0$ is true, $W \approx \chi_1^2\\$
+P-value $= P(\chi_1^2 \geq 121.6) =$ pchisq(121.6, df = 1, lower.tail=F)
+
+# Method of moments estimation
+In this section, we found the $\hat{\psi_0^{mom}}$, confidence intervals for $\psi_0$ using bootstrap, and the empirical P-values to calculate the P-value that tests $H_0: \psi_0 = 0.3$ versus $H_a: \psi_0 > 0.3$. $\\$
+
+
+We observed $t = 8$ and the distribution is $T \sim (n = 170, \pi) \\$
+parameter of interest: $\psi = \frac{1 - 2\pi}{1-\pi} \Longleftrightarrow \pi=\frac{1- \psi}{2- \psi}\\$ 
+Assuming the estimator is unbiased, M.O.M estimator satisfies $\\$
+\begin{align}
+\begin{aligned}
+E[T] &= t \\
+n\pi &= t \\
+170\pi &= t \\
+170 \times \frac{1- \psi}{2- \psi} &= t \\
+170 \times \frac{1- \psi}{2- \psi} &= 8 \\
+\frac{1- \psi}{2- \psi} = \frac{8}{170}\\
+8(2- \psi) &= 170(1-\psi) \\
+16 - 8\psi &= 170 - 170\psi \\
+162 \psi &= 154 \\
+\hat{\psi_0} &= \frac{154}{162} \approx 0.95 \\
+\hat{\psi_0^{mom}} &= 0.95\\
+\end{aligned}
+\end{align}
+
+To get the confidence intervals, the parametric bootstrap was used because we repeatedly draw new samples from a binomial distribution. $\\$
+We then used the Simple Percentile Method to find the confidence intervals because the $\hat{\psi_0^{mom}}$ we calculated which is 0.95 indicates that the sampling distribution would be skewed. $\\$
+
+To find the P-value that tests $H_0: \psi_0 = 0.3$  $H_a: \psi_0 > 0.3$, we used 
+empirical P-values where we calculated the p value by determining the proportion of time the test statistic value was at least as large as our observed value $t=8$.
+
+  *Assessment:*
+  
+  - *Could the analyses be repeated based on the information given here?*
+  
+  - *Is fluency of concepts demonstrated?*
+  
+  - *Is the material organized into logical categories.*
+    
+   
+
+
+
+
+
