@@ -27,9 +27,13 @@ c. **Keywords**:
 * Coronavirus (COVID 19): A contagious infectious disease caused by SARS-CoV-2, first originating in Wuhan, China December 2019 $^1$.
 * Pfizer Vaccine (BNT162b2):A two-dose vaccine for SARS-CoV-2, safe for all individuals 6 months and above $^3$.
 
-d. **Introduction**: With a total of 775 million cases and 7 million deaths reported from January 2020-May 2024 $^4$, Coronavirus has affected people around the globe and continues to be an ongoing concern. After being declared a pandemic by the World Health Organization on March 11, 2020 $^1$ emergency use authorizations were issued to combat the virus. In December 2020, Pfizer and BioNTech successfully obtained a US FDA Emergency Use Authorization (EUA) to begin distributing their vaccine (BNT162b2) for COVID 19 $^{6.3}$.
+d. **Introduction**: With a total of 775 million cases and 7 million deaths reported from January 2020-May 2024 $^4$, Coronavirus has affected people around the globe and continues to be an ongoing concern. After being declared a pandemic by the World Health Organization on March 11, 2020 countries scrambled to mount a defense against this deadly virus. Reactive measures in the United States included travel bans and statewide lock downs, while hospitals filled with patients$^1$. To reach a more stable solution an effective vaccine was needed. Once companies started developing this lifesaving technology, emergency use authorizations were issued to accelerate the approval of these vaccines and allow them to be used. 
 
-Using data as reported by Polack et al. $^2$ specifically the relevant data from Table 2 of the paper referenced above (summarized below):
+
+In December 2020, Pfizer and BioNTech successfully obtained a U.S. FDA Emergency Use Authorization (EUA) to begin distributing their vaccine (BNT162b2) for COVID 19 $^{6.3}$. To obtain the emergency use authorization, an efficacy rate of at least 30% is required $^{6.4}$. Using data as reported by Polack et al.$^2$, we will use maximum likelihood estimation and method of moments estimation to report the estimated efficacy rate of the Pfizer vaccine. Using these estimates we will preform hypothesis testing to determine if the efficacy rate meets the FDA EUA requirements of at least 30% $^{6.4}$. In addition we will create $95 \%$confidence intervals for the efficacy rate using bootstrapping. The data we're using is collected from a placebo-controlled, observer-blinded efficacy study, which randomly assigned persons 16 years of age or older in a 1:1 ratio to receive two doses, 21 days apart, of either placebo or the candidate, BNT162b2 vaccine. The primary efficacy endpoint was the time of laboratory-confirmed COVID-19. A total of 170 infections were targeted$^{6.3}$.
+
+
+We will specifically focus on the relevant data from Table 2 of the paper referenced above (summarized below):
 \begin{table}[h]
 \centering
 \caption{Vaccine Efficacy against Covid 19 at least 7 days after second dose in patients without evidence of infection}
@@ -40,14 +44,10 @@ Placebo & 162 & 17,511 \\ \hline
 Total & 170 & 34,922 \\ \hline
 \end{tabular}
 \end{table} 
-
-We will use maximum likelihood estimation and method of moments estimation to report the estimated efficacy rate of the Pfizer vaccine. Using these estimates we will preform hypothesis testing to determine if the efficacy rate meets the FDA EUA requirements of at least 30% $^{6.4}$.
    
 e. **Statistical Methods**: begin with defining the random variable and your statistical model, define the parameter of interest and then describe at least two different approaches you will use to make inference about it. 
 
     You should have (at least) two subsections, one for each method, which contain formulas and details of calculations related to that method. The results for the data at hand will only be shown in the next section.
-
-
 
   *Assessment:*
   
